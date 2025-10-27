@@ -1893,6 +1893,7 @@ function Starlight:CreateWindow(WindowSettings)
 			AcrylicObject2.Model.Size = Vector3.new(1.0,1.0,0.001)
 		end)
 		
+		-- Force ClipsDescendants on all containers to prevent acrylic ghosting
 		mainWindow.ClipsDescendants = true
 		mainWindow.Content.ClipsDescendants = true
 		mainWindow.Content.Topbar.ClipsDescendants = true
@@ -2035,6 +2036,7 @@ function Starlight:CreateWindow(WindowSettings)
 			ThemeMethods.bindTheme(mainWindow.Content.Topbar.NotificationCenterIcon, "ImageColor3", "Foregrounds.Dark")
 			ThemeMethods.bindTheme(mainWindow.Content.Topbar.Search, "ImageColor3", "Foregrounds.Dark")
 			
+			-- Hide unwanted header buttons
 			mainWindow.Content.Topbar.NotificationCenterIcon.Visible = false
 			mainWindow.Content.Topbar.Search.Visible = false
 			mainWindow.Content.Topbar.Controls.Maximize.Visible = false
