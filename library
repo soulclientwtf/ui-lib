@@ -1898,6 +1898,8 @@ function Starlight:CreateWindow(WindowSettings)
 		mainWindow.Content.ClipsDescendants = true
 		mainWindow.Content.Topbar.ClipsDescendants = true
 		mainWindow.Content.ContentMain.ClipsDescendants = true
+		mainWindow.Content.ContentMain.FadesTop.ClipsDescendants = true
+		mainWindow.Content.ContentMain.FadesBottom.ClipsDescendants = true
 		mainWindow.Sidebar.ClipsDescendants = true
 
 		acrylicEvent.Event:Connect(function()
@@ -3056,21 +3058,25 @@ function Starlight:CreateWindow(WindowSettings)
 				local basetrans = 0
 
 				local function updTop()
+					local isCurrentPage = tabs.UIPageLayout.CurrentPage == Tab.Instances.Page
+					fadetop.Visible = isCurrentPage
+					if not isCurrentPage then return end
 					if column.CanvasPosition.Y ~= 0 then
 						fadetop.BackgroundTransparency = basetrans
 					else
 						fadetop.BackgroundTransparency = 1
 					end
-					fadetop.Visible = tabs.UIPageLayout.CurrentPage == Tab.Instances.Page
 				end
 
 				local function updBottom()
+					local isCurrentPage = tabs.UIPageLayout.CurrentPage == Tab.Instances.Page
+					fadebottom.Visible = isCurrentPage
+					if not isCurrentPage then return end
 					if column.CanvasPosition.Y + column.AbsoluteWindowSize.Y ~= column.AbsoluteCanvasSize.Y then
 						fadebottom.BackgroundTransparency = basetrans
 					else
 						fadebottom.BackgroundTransparency = 1
 					end
-					fadebottom.Visible = tabs.UIPageLayout.CurrentPage == Tab.Instances.Page
 				end
 				acrylicEvent.Event:Connect(function()
 					if mainAcrylic then
