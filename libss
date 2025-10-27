@@ -3044,6 +3044,8 @@ function Starlight:CreateWindow(WindowSettings)
 					end
 				end
 
+				-- Fade elements disabled to prevent blur ghosting artifacts
+				--[[
 				local fadetop = mainWindow.Content.ContentMain.FadesTop.Fade:Clone()
 				fadetop.Name = "FadeTop"
 				fadetop.Size = UDim2.new(1, 0, 0, 40)
@@ -3098,6 +3100,7 @@ function Starlight:CreateWindow(WindowSettings)
 
 				fadetop.Parent = column
 				fadebottom.Parent = column
+				--]]
 			end
 
 			ThemeMethods.bindTheme(Tab.Instances.Button, "BackgroundColor3", "Backgrounds.Dark")
