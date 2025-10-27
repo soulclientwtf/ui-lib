@@ -1,1 +1,0 @@
-loadstring(game:HttpGet("https://raw.githubusercontent.com/soulclientwtf/ui-lib/refs/heads/main/lib.lua"))() 
