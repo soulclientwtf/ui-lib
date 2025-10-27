@@ -1,0 +1,838 @@
+-- Nexus UI Library v1.0
+-- Modern Roblox UI Library
+-- All-in-one LocalScript
+
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local CoreGui = game:GetService("CoreGui")
+
+local NexusUI = {}
+NexusUI.__index = NexusUI
+
+-- Theme Configuration
+local Theme = {
+    Background = Color3.fromRGB(15, 15, 20),
+    Secondary = Color3.fromRGB(25, 25, 35),
+    Accent = Color3.fromRGB(138, 43, 226),
+    AccentHover = Color3.fromRGB(158, 63, 246),
+    Text = Color3.fromRGB(255, 255, 255),
+    TextDark = Color3.fromRGB(180, 180, 190),
+    Border = Color3.fromRGB(45, 45, 55),
+    Success = Color3.fromRGB(46, 204, 113),
+    Danger = Color3.fromRGB(231, 76, 60),
+}
+
+-- Utility Functions
+local function Tween(obj, props, duration, style, direction)
+    local tweenInfo = TweenInfo.new(duration or 0.3, style or Enum.EasingStyle.Quad, direction or Enum.EasingDirection.Out)
+    local tween = TweenService:Create(obj, tweenInfo, props)
+    tween:Play()
+    return tween
+end
+
+local function CreateElement(className, properties)
+    local element = Instance.new(className)
+    for prop, value in pairs(properties) do
+        if prop ~= "Parent" then
+            element[prop] = value
+        end
+    end
+    if properties.Parent then
+        element.Parent = properties.Parent
+    end
+    return element
+end
+
+local function AddCorner(parent, radius)
+    return CreateElement("UICorner", {
+        CornerRadius = UDim.new(0, radius or 8),
+        Parent = parent
+    })
+end
+
+local function AddStroke(parent, color, thickness)
+    return CreateElement("UIStroke", {
+        Color = color or Theme.Border,
+        Thickness = thickness or 1,
+        ApplyStrokeMode = Enum.ApplyStrokeMode.Border,
+        Parent = parent
+    })
+end
+
+-- Main Library Constructor
+function NexusUI:CreateWindow(config)
+    local Window = {}
+    Window.Tabs = {}
+    Window.CurrentTab = nil
+    
+    -- Create ScreenGui
+    local ScreenGui = CreateElement("ScreenGui", {
+        Name = "NexusUI_" .. tick(),
+        Parent = CoreGui,
+        ZIndexBehavior = Enum.ZIndexBehavior.Sibling,
+        ResetOnSpawn = false
+    })
+    
+    -- Main Window Frame
+    local MainFrame = CreateElement("Frame", {
+        Name = "MainFrame",
+        Parent = ScreenGui,
+        BackgroundColor3 = Theme.Background,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0.5, -350, 0.5, -250),
+        Size = UDim2.new(0, 700, 0, 500),
+        ClipsDescendants = true
+    })
+    AddCorner(MainFrame, 12)
+    AddStroke(MainFrame, Theme.Accent, 2)
+    
+    -- Shadow Effect
+    local Shadow = CreateElement("ImageLabel", {
+        Name = "Shadow",
+        Parent = MainFrame,
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0, -15, 0, -15),
+        Size = UDim2.new(1, 30, 1, 30),
+        ZIndex = 0,
+        Image = "rbxasset://textures/ui/GuiImagePlaceholder.png",
+        ImageColor3 = Color3.new(0, 0, 0),
+        ImageTransparency = 0.5,
+        ScaleType = Enum.ScaleType.Slice,
+        SliceCenter = Rect.new(10, 10, 10, 10)
+    })
+    
+    -- Top Bar
+    local TopBar = CreateElement("Frame", {
+        Name = "TopBar",
+        Parent = MainFrame,
+        BackgroundColor3 = Theme.Secondary,
+        BorderSizePixel = 0,
+        Size = UDim2.new(1, 0, 0, 45),
+        ZIndex = 2
+    })
+    AddCorner(TopBar, 12)
+    
+    -- Title
+    local Title = CreateElement("TextLabel", {
+        Name = "Title",
+        Parent = TopBar,
+        BackgroundTransparency = 1,
+        Position = UDim2.new(0, 20, 0, 0),
+        Size = UDim2.new(0, 300, 1, 0),
+        Font = Enum.Font.GothamBold,
+        Text = config.Title or "Nexus UI",
+        TextColor3 = Theme.Text,
+        TextSize = 18,
+        TextXAlignment = Enum.TextXAlignment.Left
+    })
+    
+    -- Accent Line
+    local AccentLine = CreateElement("Frame", {
+        Name = "AccentLine",
+        Parent = TopBar,
+        BackgroundColor3 = Theme.Accent,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0, 0, 1, -2),
+        Size = UDim2.new(1, 0, 0, 2)
+    })
+    
+    -- Close Button
+    local CloseBtn = CreateElement("TextButton", {
+        Name = "CloseBtn",
+        Parent = TopBar,
+        BackgroundColor3 = Theme.Danger,
+        BorderSizePixel = 0,
+        Position = UDim2.new(1, -35, 0.5, -12),
+        Size = UDim2.new(0, 24, 0, 24),
+        Font = Enum.Font.GothamBold,
+        Text = "×",
+        TextColor3 = Theme.Text,
+        TextSize = 20
+    })
+    AddCorner(CloseBtn, 6)
+    
+    CloseBtn.MouseButton1Click:Connect(function()
+        Tween(MainFrame, {Size = UDim2.new(0, 0, 0, 0)}, 0.3, Enum.EasingStyle.Back)
+        wait(0.3)
+        ScreenGui:Destroy()
+    end)
+    
+    CloseBtn.MouseEnter:Connect(function()
+        Tween(CloseBtn, {BackgroundColor3 = Color3.fromRGB(255, 76, 60)}, 0.2)
+    end)
+    
+    CloseBtn.MouseLeave:Connect(function()
+        Tween(CloseBtn, {BackgroundColor3 = Theme.Danger}, 0.2)
+    end)
+    
+    -- Minimize Button
+    local MinimizeBtn = CreateElement("TextButton", {
+        Name = "MinimizeBtn",
+        Parent = TopBar,
+        BackgroundColor3 = Theme.Accent,
+        BorderSizePixel = 0,
+        Position = UDim2.new(1, -65, 0.5, -12),
+        Size = UDim2.new(0, 24, 0, 24),
+        Font = Enum.Font.GothamBold,
+        Text = "−",
+        TextColor3 = Theme.Text,
+        TextSize = 20
+    })
+    AddCorner(MinimizeBtn, 6)
+    
+    local Minimized = false
+    MinimizeBtn.MouseButton1Click:Connect(function()
+        Minimized = not Minimized
+        if Minimized then
+            Tween(MainFrame, {Size = UDim2.new(0, 700, 0, 45)}, 0.3)
+        else
+            Tween(MainFrame, {Size = UDim2.new(0, 700, 0, 500)}, 0.3)
+        end
+    end)
+    
+    MinimizeBtn.MouseEnter:Connect(function()
+        Tween(MinimizeBtn, {BackgroundColor3 = Theme.AccentHover}, 0.2)
+    end)
+    
+    MinimizeBtn.MouseLeave:Connect(function()
+        Tween(MinimizeBtn, {BackgroundColor3 = Theme.Accent}, 0.2)
+    end)
+    
+    -- Tab Bar
+    local TabBar = CreateElement("Frame", {
+        Name = "TabBar",
+        Parent = MainFrame,
+        BackgroundColor3 = Theme.Secondary,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0, 0, 0, 45),
+        Size = UDim2.new(0, 150, 1, -45)
+    })
+    
+    local TabList = CreateElement("UIListLayout", {
+        Parent = TabBar,
+        SortOrder = Enum.SortOrder.LayoutOrder,
+        Padding = UDim.new(0, 5)
+    })
+    
+    local TabPadding = CreateElement("UIPadding", {
+        Parent = TabBar,
+        PaddingTop = UDim.new(0, 10),
+        PaddingLeft = UDim.new(0, 10),
+        PaddingRight = UDim.new(0, 10)
+    })
+    
+    -- Content Container
+    local ContentContainer = CreateElement("Frame", {
+        Name = "ContentContainer",
+        Parent = MainFrame,
+        BackgroundColor3 = Theme.Background,
+        BorderSizePixel = 0,
+        Position = UDim2.new(0, 150, 0, 45),
+        Size = UDim2.new(1, -150, 1, -45),
+        ClipsDescendants = true
+    })
+    
+    -- Dragging
+    local Dragging = false
+    local DragInput, DragStart, StartPos
+    
+    TopBar.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            Dragging = true
+            DragStart = input.Position
+            StartPos = MainFrame.Position
+            
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    Dragging = false
+                end
+            end)
+        end
+    end)
+    
+    TopBar.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            DragInput = input
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if input == DragInput and Dragging then
+            local Delta = input.Position - DragStart
+            MainFrame.Position = UDim2.new(StartPos.X.Scale, StartPos.X.Offset + Delta.X, StartPos.Y.Scale, StartPos.Y.Offset + Delta.Y)
+        end
+    end)
+    
+    -- Add Tab Function
+    function Window:AddTab(name)
+        local Tab = {}
+        Tab.Elements = {}
+        
+        -- Tab Button
+        local TabButton = CreateElement("TextButton", {
+            Name = name,
+            Parent = TabBar,
+            BackgroundColor3 = Theme.Background,
+            BorderSizePixel = 0,
+            Size = UDim2.new(1, 0, 0, 35),
+            Font = Enum.Font.Gotham,
+            Text = name,
+            TextColor3 = Theme.TextDark,
+            TextSize = 14,
+            TextXAlignment = Enum.TextXAlignment.Left
+        })
+        AddCorner(TabButton, 6)
+        
+        local TabPadding = CreateElement("UIPadding", {
+            Parent = TabButton,
+            PaddingLeft = UDim.new(0, 12)
+        })
+        
+        -- Tab Content
+        local TabContent = CreateElement("ScrollingFrame", {
+            Name = name .. "Content",
+            Parent = ContentContainer,
+            BackgroundTransparency = 1,
+            BorderSizePixel = 0,
+            Size = UDim2.new(1, 0, 1, 0),
+            Visible = false,
+            ScrollBarThickness = 4,
+            ScrollBarImageColor3 = Theme.Accent,
+            CanvasSize = UDim2.new(0, 0, 0, 0),
+            AutomaticCanvasSize = Enum.AutomaticSize.Y
+        })
+        
+        local ContentList = CreateElement("UIListLayout", {
+            Parent = TabContent,
+            SortOrder = Enum.SortOrder.LayoutOrder,
+            Padding = UDim.new(0, 8)
+        })
+        
+        local ContentPadding = CreateElement("UIPadding", {
+            Parent = TabContent,
+            PaddingTop = UDim.new(0, 15),
+            PaddingLeft = UDim.new(0, 15),
+            PaddingRight = UDim.new(0, 15),
+            PaddingBottom = UDim.new(0, 15)
+        })
+        
+        -- Tab Selection
+        TabButton.MouseButton1Click:Connect(function()
+            for _, tab in pairs(Window.Tabs) do
+                tab.Button.BackgroundColor3 = Theme.Background
+                tab.Button.TextColor3 = Theme.TextDark
+                tab.Content.Visible = false
+            end
+            
+            TabButton.BackgroundColor3 = Theme.Accent
+            TabButton.TextColor3 = Theme.Text
+            TabContent.Visible = true
+            Window.CurrentTab = Tab
+        end)
+        
+        TabButton.MouseEnter:Connect(function()
+            if TabButton.BackgroundColor3 ~= Theme.Accent then
+                Tween(TabButton, {BackgroundColor3 = Theme.Border}, 0.2)
+            end
+        end)
+        
+        TabButton.MouseLeave:Connect(function()
+            if TabButton.BackgroundColor3 ~= Theme.Accent then
+                Tween(TabButton, {BackgroundColor3 = Theme.Background}, 0.2)
+            end
+        end)
+        
+        Tab.Button = TabButton
+        Tab.Content = TabContent
+        
+        -- Select first tab by default
+        if #Window.Tabs == 0 then
+            TabButton.BackgroundColor3 = Theme.Accent
+            TabButton.TextColor3 = Theme.Text
+            TabContent.Visible = true
+            Window.CurrentTab = Tab
+        end
+        
+        table.insert(Window.Tabs, Tab)
+        
+        -- Add Label
+        function Tab:AddLabel(text)
+            local Label = CreateElement("TextLabel", {
+                Parent = TabContent,
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, -30, 0, 25),
+                Font = Enum.Font.Gotham,
+                Text = text,
+                TextColor3 = Theme.Text,
+                TextSize = 14,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                TextWrapped = true,
+                AutomaticSize = Enum.AutomaticSize.Y
+            })
+            
+            return {
+                SetText = function(self, newText)
+                    Label.Text = newText
+                end
+            }
+        end
+        
+        -- Add Button
+        function Tab:AddButton(config)
+            local ButtonFrame = CreateElement("Frame", {
+                Parent = TabContent,
+                BackgroundColor3 = Theme.Secondary,
+                BorderSizePixel = 0,
+                Size = UDim2.new(1, -30, 0, 40)
+            })
+            AddCorner(ButtonFrame, 8)
+            
+            local Button = CreateElement("TextButton", {
+                Parent = ButtonFrame,
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 1, 0),
+                Font = Enum.Font.GothamSemibold,
+                Text = config.Name or "Button",
+                TextColor3 = Theme.Text,
+                TextSize = 14
+            })
+            
+            Button.MouseButton1Click:Connect(function()
+                Tween(ButtonFrame, {BackgroundColor3 = Theme.Accent}, 0.1)
+                wait(0.1)
+                Tween(ButtonFrame, {BackgroundColor3 = Theme.Secondary}, 0.1)
+                
+                if config.Callback then
+                    config.Callback()
+                end
+            end)
+            
+            Button.MouseEnter:Connect(function()
+                Tween(ButtonFrame, {BackgroundColor3 = Theme.Border}, 0.2)
+            end)
+            
+            Button.MouseLeave:Connect(function()
+                Tween(ButtonFrame, {BackgroundColor3 = Theme.Secondary}, 0.2)
+            end)
+            
+            return {
+                SetText = function(self, text)
+                    Button.Text = text
+                end
+            }
+        end
+        
+        -- Add Toggle
+        function Tab:AddToggle(config)
+            local toggled = config.Default or false
+            
+            local ToggleFrame = CreateElement("Frame", {
+                Parent = TabContent,
+                BackgroundColor3 = Theme.Secondary,
+                BorderSizePixel = 0,
+                Size = UDim2.new(1, -30, 0, 40)
+            })
+            AddCorner(ToggleFrame, 8)
+            
+            local ToggleLabel = CreateElement("TextLabel", {
+                Parent = ToggleFrame,
+                BackgroundTransparency = 1,
+                Position = UDim2.new(0, 15, 0, 0),
+                Size = UDim2.new(1, -70, 1, 0),
+                Font = Enum.Font.Gotham,
+                Text = config.Name or "Toggle",
+                TextColor3 = Theme.Text,
+                TextSize = 14,
+                TextXAlignment = Enum.TextXAlignment.Left
+            })
+            
+            local ToggleOuter = CreateElement("Frame", {
+                Parent = ToggleFrame,
+                BackgroundColor3 = toggled and Theme.Accent or Theme.Border,
+                BorderSizePixel = 0,
+                Position = UDim2.new(1, -55, 0.5, -10),
+                Size = UDim2.new(0, 45, 0, 20)
+            })
+            AddCorner(ToggleOuter, 10)
+            
+            local ToggleInner = CreateElement("Frame", {
+                Parent = ToggleOuter,
+                BackgroundColor3 = Theme.Text,
+                BorderSizePixel = 0,
+                Position = toggled and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8),
+                Size = UDim2.new(0, 16, 0, 16)
+            })
+            AddCorner(ToggleInner, 8)
+            
+            local ToggleButton = CreateElement("TextButton", {
+                Parent = ToggleFrame,
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 1, 0),
+                Text = ""
+            })
+            
+            ToggleButton.MouseButton1Click:Connect(function()
+                toggled = not toggled
+                
+                Tween(ToggleOuter, {BackgroundColor3 = toggled and Theme.Accent or Theme.Border}, 0.2)
+                Tween(ToggleInner, {Position = toggled and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)}, 0.2)
+                
+                if config.Callback then
+                    config.Callback(toggled)
+                end
+            end)
+            
+            ToggleButton.MouseEnter:Connect(function()
+                Tween(ToggleFrame, {BackgroundColor3 = Theme.Border}, 0.2)
+            end)
+            
+            ToggleButton.MouseLeave:Connect(function()
+                Tween(ToggleFrame, {BackgroundColor3 = Theme.Secondary}, 0.2)
+            end)
+            
+            return {
+                SetValue = function(self, value)
+                    toggled = value
+                    Tween(ToggleOuter, {BackgroundColor3 = toggled and Theme.Accent or Theme.Border}, 0.2)
+                    Tween(ToggleInner, {Position = toggled and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)}, 0.2)
+                end
+            }
+        end
+        
+        -- Add Slider
+        function Tab:AddSlider(config)
+            local min = config.Min or 0
+            local max = config.Max or 100
+            local default = config.Default or min
+            local callback = config.Callback or function() end
+            
+            local SliderFrame = CreateElement("Frame", {
+                Parent = TabContent,
+                BackgroundColor3 = Theme.Secondary,
+                BorderSizePixel = 0,
+                Size = UDim2.new(1, -30, 0, 55)
+            })
+            AddCorner(SliderFrame, 8)
+            
+            local SliderLabel = CreateElement("TextLabel", {
+                Parent = SliderFrame,
+                BackgroundTransparency = 1,
+                Position = UDim2.new(0, 15, 0, 5),
+                Size = UDim2.new(1, -70, 0, 20),
+                Font = Enum.Font.Gotham,
+                Text = config.Name or "Slider",
+                TextColor3 = Theme.Text,
+                TextSize = 14,
+                TextXAlignment = Enum.TextXAlignment.Left
+            })
+            
+            local SliderValue = CreateElement("TextLabel", {
+                Parent = SliderFrame,
+                BackgroundTransparency = 1,
+                Position = UDim2.new(1, -60, 0, 5),
+                Size = UDim2.new(0, 50, 0, 20),
+                Font = Enum.Font.GothamBold,
+                Text = tostring(default),
+                TextColor3 = Theme.Accent,
+                TextSize = 14,
+                TextXAlignment = Enum.TextXAlignment.Right
+            })
+            
+            local SliderBar = CreateElement("Frame", {
+                Parent = SliderFrame,
+                BackgroundColor3 = Theme.Border,
+                BorderSizePixel = 0,
+                Position = UDim2.new(0, 15, 1, -20),
+                Size = UDim2.new(1, -30, 0, 6)
+            })
+            AddCorner(SliderBar, 3)
+            
+            local SliderFill = CreateElement("Frame", {
+                Parent = SliderBar,
+                BackgroundColor3 = Theme.Accent,
+                BorderSizePixel = 0,
+                Size = UDim2.new((default - min) / (max - min), 0, 1, 0)
+            })
+            AddCorner(SliderFill, 3)
+            
+            local SliderButton = CreateElement("TextButton", {
+                Parent = SliderBar,
+                BackgroundColor3 = Theme.Text,
+                BorderSizePixel = 0,
+                Position = UDim2.new((default - min) / (max - min), -6, 0.5, -6),
+                Size = UDim2.new(0, 12, 0, 12),
+                Text = ""
+            })
+            AddCorner(SliderButton, 6)
+            
+            local dragging = false
+            
+            SliderButton.MouseButton1Down:Connect(function()
+                dragging = true
+            end)
+            
+            UserInputService.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                    dragging = false
+                end
+            end)
+            
+            UserInputService.InputChanged:Connect(function(input)
+                if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+                    local mousePos = UserInputService:GetMouseLocation().X
+                    local barPos = SliderBar.AbsolutePosition.X
+                    local barSize = SliderBar.AbsoluteSize.X
+                    local percentage = math.clamp((mousePos - barPos) / barSize, 0, 1)
+                    local value = math.floor(min + (max - min) * percentage)
+                    
+                    SliderFill.Size = UDim2.new(percentage, 0, 1, 0)
+                    SliderButton.Position = UDim2.new(percentage, -6, 0.5, -6)
+                    SliderValue.Text = tostring(value)
+                    
+                    callback(value)
+                end
+            end)
+            
+            return {
+                SetValue = function(self, value)
+                    local percentage = (value - min) / (max - min)
+                    SliderFill.Size = UDim2.new(percentage, 0, 1, 0)
+                    SliderButton.Position = UDim2.new(percentage, -6, 0.5, -6)
+                    SliderValue.Text = tostring(value)
+                end
+            }
+        end
+        
+        -- Add TextBox
+        function Tab:AddTextBox(config)
+            local TextBoxFrame = CreateElement("Frame", {
+                Parent = TabContent,
+                BackgroundColor3 = Theme.Secondary,
+                BorderSizePixel = 0,
+                Size = UDim2.new(1, -30, 0, 40)
+            })
+            AddCorner(TextBoxFrame, 8)
+            
+            local TextBoxLabel = CreateElement("TextLabel", {
+                Parent = TextBoxFrame,
+                BackgroundTransparency = 1,
+                Position = UDim2.new(0, 15, 0, 0),
+                Size = UDim2.new(0.4, 0, 1, 0),
+                Font = Enum.Font.Gotham,
+                Text = config.Name or "TextBox",
+                TextColor3 = Theme.Text,
+                TextSize = 14,
+                TextXAlignment = Enum.TextXAlignment.Left
+            })
+            
+            local TextBox = CreateElement("TextBox", {
+                Parent = TextBoxFrame,
+                BackgroundColor3 = Theme.Border,
+                BorderSizePixel = 0,
+                Position = UDim2.new(0.45, 0, 0.5, -12),
+                Size = UDim2.new(0.5, -15, 0, 24),
+                Font = Enum.Font.Gotham,
+                PlaceholderText = config.Placeholder or "Enter text...",
+                PlaceholderColor3 = Theme.TextDark,
+                Text = config.Default or "",
+                TextColor3 = Theme.Text,
+                TextSize = 13,
+                ClearTextOnFocus = false
+            })
+            AddCorner(TextBox, 6)
+            
+            local TextBoxPadding = CreateElement("UIPadding", {
+                Parent = TextBox,
+                PaddingLeft = UDim.new(0, 8),
+                PaddingRight = UDim.new(0, 8)
+            })
+            
+            TextBox.FocusLost:Connect(function(enterPressed)
+                if enterPressed and config.Callback then
+                    config.Callback(TextBox.Text)
+                end
+            end)
+            
+            return {
+                SetValue = function(self, text)
+                    TextBox.Text = text
+                end,
+                GetValue = function(self)
+                    return TextBox.Text
+                end
+            }
+        end
+        
+        -- Add Dropdown
+        function Tab:AddDropdown(config)
+            local options = config.Options or {}
+            local selected = config.Default or options[1] or ""
+            local callback = config.Callback or function() end
+            local isOpen = false
+            
+            local DropdownFrame = CreateElement("Frame", {
+                Parent = TabContent,
+                BackgroundColor3 = Theme.Secondary,
+                BorderSizePixel = 0,
+                Size = UDim2.new(1, -30, 0, 40),
+                ClipsDescendants = false,
+                ZIndex = 10
+            })
+            AddCorner(DropdownFrame, 8)
+            
+            local DropdownLabel = CreateElement("TextLabel", {
+                Parent = DropdownFrame,
+                BackgroundTransparency = 1,
+                Position = UDim2.new(0, 15, 0, 0),
+                Size = UDim2.new(0.4, 0, 1, 0),
+                Font = Enum.Font.Gotham,
+                Text = config.Name or "Dropdown",
+                TextColor3 = Theme.Text,
+                TextSize = 14,
+                TextXAlignment = Enum.TextXAlignment.Left,
+                ZIndex = 11
+            })
+            
+            local DropdownButton = CreateElement("TextButton", {
+                Parent = DropdownFrame,
+                BackgroundColor3 = Theme.Border,
+                BorderSizePixel = 0,
+                Position = UDim2.new(0.45, 0, 0.5, -12),
+                Size = UDim2.new(0.5, -15, 0, 24),
+                Font = Enum.Font.Gotham,
+                Text = selected,
+                TextColor3 = Theme.Text,
+                TextSize = 13,
+                ZIndex = 11
+            })
+            AddCorner(DropdownButton, 6)
+            
+            local DropdownIcon = CreateElement("TextLabel", {
+                Parent = DropdownButton,
+                BackgroundTransparency = 1,
+                Position = UDim2.new(1, -20, 0, 0),
+                Size = UDim2.new(0, 20, 1, 0),
+                Font = Enum.Font.Gotham,
+                Text = "▼",
+                TextColor3 = Theme.TextDark,
+                TextSize = 10,
+                ZIndex = 11
+            })
+            
+            local DropdownList = CreateElement("Frame", {
+                Parent = DropdownFrame,
+                BackgroundColor3 = Theme.Background,
+                BorderSizePixel = 0,
+                Position = UDim2.new(0.45, 0, 0, 42),
+                Size = UDim2.new(0.5, -15, 0, 0),
+                Visible = false,
+                ZIndex = 12,
+                ClipsDescendants = true
+            })
+            AddCorner(DropdownList, 6)
+            AddStroke(DropdownList, Theme.Accent, 1)
+            
+            local DropdownListLayout = CreateElement("UIListLayout", {
+                Parent = DropdownList,
+                SortOrder = Enum.SortOrder.LayoutOrder,
+                Padding = UDim.new(0, 2)
+            })
+            
+            local function UpdateDropdown()
+                for _, child in pairs(DropdownList:GetChildren()) do
+                    if child:IsA("TextButton") then
+                        child:Destroy()
+                    end
+                end
+                
+                for _, option in ipairs(options) do
+                    local OptionButton = CreateElement("TextButton", {
+                        Parent = DropdownList,
+                        BackgroundColor3 = Theme.Secondary,
+                        BorderSizePixel = 0,
+                        Size = UDim2.new(1, 0, 0, 28),
+                        Font = Enum.Font.Gotham,
+                        Text = option,
+                        TextColor3 = Theme.Text,
+                        TextSize = 13,
+                        ZIndex = 13
+                    })
+                    
+                    OptionButton.MouseButton1Click:Connect(function()
+                        selected = option
+                        DropdownButton.Text = option
+                        isOpen = false
+                        DropdownList.Visible = false
+                        Tween(DropdownList, {Size = UDim2.new(0.5, -15, 0, 0)}, 0.2)
+                        Tween(DropdownFrame, {Size = UDim2.new(1, -30, 0, 40)}, 0.2)
+                        callback(option)
+                    end)
+                    
+                    OptionButton.MouseEnter:Connect(function()
+                        Tween(OptionButton, {BackgroundColor3 = Theme.Border}, 0.2)
+                    end)
+                    
+                    OptionButton.MouseLeave:Connect(function()
+                        Tween(OptionButton, {BackgroundColor3 = Theme.Secondary}, 0.2)
+                    end)
+                end
+            end
+            
+            UpdateDropdown()
+            
+            DropdownButton.MouseButton1Click:Connect(function()
+                isOpen = not isOpen
+                DropdownList.Visible = isOpen
+                
+                if isOpen then
+                    local listHeight = math.min(#options * 30, 150)
+                    Tween(DropdownList, {Size = UDim2.new(0.5, -15, 0, listHeight)}, 0.2)
+                    Tween(DropdownFrame, {Size = UDim2.new(1, -30, 0, 40 + listHeight + 10)}, 0.2)
+                else
+                    Tween(DropdownList, {Size = UDim2.new(0.5, -15, 0, 0)}, 0.2)
+                    Tween(DropdownFrame, {Size = UDim2.new(1, -30, 0, 40)}, 0.2)
+                end
+            end)
+            
+            return {
+                SetValue = function(self, value)
+                    selected = value
+                    DropdownButton.Text = value
+                end,
+                Refresh = function(self, newOptions)
+                    options = newOptions
+                    UpdateDropdown()
+                end
+            }
+        end
+        
+        -- Add Separator
+        function Tab:AddSeparator()
+            local Separator = CreateElement("Frame", {
+                Parent = TabContent,
+                BackgroundColor3 = Theme.Border,
+                BorderSizePixel = 0,
+                Size = UDim2.new(1, -30, 0, 1)
+            })
+        end
+        
+        -- Add Spacer
+        function Tab:AddSpacer(height)
+            CreateElement("Frame", {
+                Parent = TabContent,
+                BackgroundTransparency = 1,
+                Size = UDim2.new(1, 0, 0, height or 10)
+            })
+        end
+        
+        return Tab
+    end
+    
+    -- Intro Animation
+    MainFrame.Size = UDim2.new(0, 0, 0, 0)
+    Tween(MainFrame, {Size = UDim2.new(0, 700, 0, 500)}, 0.5, Enum.EasingStyle.Back)
+    
+    return Window
+end
+
+return NexusUI
