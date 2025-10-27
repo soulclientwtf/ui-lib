@@ -18,7 +18,7 @@ local Starlight = {
 	OnDestroy = nil,
 
 	FileSystem = {
-		Folder = "Starlight Interface Suite",
+		Folder = "verbose.lol",
 		FileExtension = ".starlight",
 
 		AutoloadConfigPath = nil,
@@ -3629,7 +3629,7 @@ function Starlight:CreateWindow(WindowSettings)
 
 				function Groupbox:CreateDropdown(ElementSettings)
 
-					-[[
+					--[[
 					ElementSettings = {
 						Name = string,
 						Icon = number, **
