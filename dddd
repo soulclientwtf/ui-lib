@@ -1900,7 +1900,9 @@ function Starlight:CreateWindow(WindowSettings)
 		mainWindow.Content.ContentMain.ClipsDescendants = true
 		mainWindow.Sidebar.ClipsDescendants = true
 		
-		-- Destroy shared fade containers and their children to prevent blur ghosting
+		-- Keep fade containers invisible to prevent blur ghosting (don't destroy - causes issues)
+		mainWindow.Content.ContentMain.FadesTop.Visible = false
+		mainWindow.Content.ContentMain.FadesBottom.Visible = false
 		for _, child in pairs(mainWindow.Content.ContentMain.FadesTop:GetDescendants()) do
 			if child:IsA("GuiObject") then
 				child.Visible = false
@@ -1911,8 +1913,6 @@ function Starlight:CreateWindow(WindowSettings)
 				child.Visible = false
 			end
 		end
-		mainWindow.Content.ContentMain.FadesTop:Destroy()
-		mainWindow.Content.ContentMain.FadesBottom:Destroy()
 
 		acrylicEvent.Event:Connect(function()
 			notificationAcrylicEvent:Fire()
@@ -2723,22 +2723,22 @@ function Starlight:CreateWindow(WindowSettings)
 				Activate()
 			end
 		end)
-		-- Destroy page fades to prevent blur ghosting
+		-- Keep page fades invisible to prevent blur ghosting (don't destroy - causes issues)
 		if Tab.Instances.Page:FindFirstChild("Fade") then
+			Tab.Instances.Page.Fade.Visible = false
 			for _, child in pairs(Tab.Instances.Page.Fade:GetDescendants()) do
 				if child:IsA("GuiObject") then
 					child.Visible = false
 				end
 			end
-			Tab.Instances.Page.Fade:Destroy()
 		end
 		if Tab.Instances.Page:FindFirstChild("Fade2") then
+			Tab.Instances.Page.Fade2.Visible = false
 			for _, child in pairs(Tab.Instances.Page.Fade2:GetDescendants()) do
 				if child:IsA("GuiObject") then
 					child.Visible = false
 				end
 			end
-			Tab.Instances.Page.Fade2:Destroy()
 		end
 		--ThemeMethods.bindTheme(Tab.Instances.Page.Fade, "BackgroundColor3", "Backgrounds.Dark")
 		--ThemeMethods.bindTheme(Tab.Instances.Page.Fade2, "BackgroundColor3", "Backgrounds.Dark")
@@ -3068,6 +3068,12 @@ function Starlight:CreateWindow(WindowSettings)
 				for i,v in column:GetChildren() do
 					if v.ClassName == "Frame" then
 						v:Destroy()
+					end
+				end
+				-- Remove any Fade elements from column template to prevent blur ghosting
+				for _, child in pairs(column:GetDescendants()) do
+					if child.Name:match("Fade") or child.Name:match("fade") then
+						child:Destroy()
 					end
 				end
 
