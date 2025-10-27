@@ -2713,8 +2713,11 @@ function Starlight:CreateWindow(WindowSettings)
 				Activate()
 			end
 		end)
-		ThemeMethods.bindTheme(Tab.Instances.Page.Fade, "BackgroundColor3", "Backgrounds.Dark")
-		ThemeMethods.bindTheme(Tab.Instances.Page.Fade2, "BackgroundColor3", "Backgrounds.Dark")
+		-- Disable page fades to prevent blur ghosting
+		Tab.Instances.Page.Fade.Visible = false
+		Tab.Instances.Page.Fade2.Visible = false
+		--ThemeMethods.bindTheme(Tab.Instances.Page.Fade, "BackgroundColor3", "Backgrounds.Dark")
+		--ThemeMethods.bindTheme(Tab.Instances.Page.Fade2, "BackgroundColor3", "Backgrounds.Dark")
 		ThemeMethods.bindTheme(Tab.Instances.Page.Thumbnail, "BackgroundColor3", "Backgrounds.Dark")
 		for _,shadow in pairs(Tab.Instances.Page.Thumbnail.DropShadowHolder:GetChildren()) do
 			ThemeMethods.bindTheme(shadow, "ImageColor3", "Miscellaneous.Shadow")
