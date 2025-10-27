@@ -1898,9 +1898,11 @@ function Starlight:CreateWindow(WindowSettings)
 		mainWindow.Content.ClipsDescendants = true
 		mainWindow.Content.Topbar.ClipsDescendants = true
 		mainWindow.Content.ContentMain.ClipsDescendants = true
-		mainWindow.Content.ContentMain.FadesTop.ClipsDescendants = true
-		mainWindow.Content.ContentMain.FadesBottom.ClipsDescendants = true
 		mainWindow.Sidebar.ClipsDescendants = true
+		
+		-- Hide shared fade containers since we parent fades to individual columns now
+		mainWindow.Content.ContentMain.FadesTop.Visible = false
+		mainWindow.Content.ContentMain.FadesBottom.Visible = false
 
 		acrylicEvent.Event:Connect(function()
 			notificationAcrylicEvent:Fire()
@@ -3043,14 +3045,16 @@ function Starlight:CreateWindow(WindowSettings)
 				end
 
 				local fadetop = mainWindow.Content.ContentMain.FadesTop.Fade:Clone()
-				fadetop.Name = "FADE_" .. TabIndex
-				fadetop.Size = UDim2.new(1/TabSettings.Columns,-10/TabSettings.Columns, 0, 40)
-				fadetop.LayoutOrder = i
+				fadetop.Name = "FadeTop"
+				fadetop.Size = UDim2.new(1, 0, 0, 40)
+				fadetop.Position = UDim2.new(0, 0, 0, 0)
+				fadetop.ZIndex = 10000
 
 				local fadebottom = mainWindow.Content.ContentMain.FadesBottom.Fade:Clone()
-				fadebottom.Name = "FADE_" .. TabIndex
-				fadebottom.Size = UDim2.new(1/TabSettings.Columns,-10/TabSettings.Columns, 0, 40)
-				fadebottom.LayoutOrder = i
+				fadebottom.Name = "FadeBottom"
+				fadebottom.Size = UDim2.new(1, 0, 0, 40)
+				fadebottom.Position = UDim2.new(0, 0, 1, -40)
+				fadebottom.ZIndex = 10000
 
 				ThemeMethods.bindTheme(fadetop.UIGradient, "Color", "Backgrounds.Dark")
 				ThemeMethods.bindTheme(fadebottom.UIGradient, "Color", "Backgrounds.Dark")
@@ -3058,9 +3062,6 @@ function Starlight:CreateWindow(WindowSettings)
 				local basetrans = 0
 
 				local function updTop()
-					local isCurrentPage = tabs.UIPageLayout.CurrentPage == Tab.Instances.Page
-					fadetop.Visible = isCurrentPage
-					if not isCurrentPage then return end
 					if column.CanvasPosition.Y ~= 0 then
 						fadetop.BackgroundTransparency = basetrans
 					else
@@ -3069,9 +3070,6 @@ function Starlight:CreateWindow(WindowSettings)
 				end
 
 				local function updBottom()
-					local isCurrentPage = tabs.UIPageLayout.CurrentPage == Tab.Instances.Page
-					fadebottom.Visible = isCurrentPage
-					if not isCurrentPage then return end
 					if column.CanvasPosition.Y + column.AbsoluteWindowSize.Y ~= column.AbsoluteCanvasSize.Y then
 						fadebottom.BackgroundTransparency = basetrans
 					else
@@ -3092,16 +3090,14 @@ function Starlight:CreateWindow(WindowSettings)
 
 				column:GetPropertyChangedSignal("CanvasPosition"):Connect(updTop)
 				column:GetPropertyChangedSignal("CanvasPosition"):Connect(updBottom)
-				tabs.UIPageLayout:GetPropertyChangedSignal("CurrentPage"):Connect(updTop)
-				tabs.UIPageLayout:GetPropertyChangedSignal("CurrentPage"):Connect(updBottom)
 
 				task.delay(1.2, function()
 					updTop()
 					updBottom()
 				end)
 
-				fadetop.Parent = mainWindow.Content.ContentMain.FadesTop
-				fadebottom.Parent = mainWindow.Content.ContentMain.FadesBottom
+				fadetop.Parent = column
+				fadebottom.Parent = column
 			end
 
 			ThemeMethods.bindTheme(Tab.Instances.Button, "BackgroundColor3", "Backgrounds.Dark")
