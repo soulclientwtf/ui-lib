@@ -4029,7 +4029,6 @@ function Starlight:CreateWindow(WindowSettings)
 					return Starlight.Window.TabSections[Name].Tabs[TabIndex].Groupboxes[GroupIndex].Elements[ElementSettings.Name]
 				end
 
-				]=]
 
 				function Groupbox:CreateButton(ElementSettings, Index)
 
