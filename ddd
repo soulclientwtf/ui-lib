@@ -1900,9 +1900,19 @@ function Starlight:CreateWindow(WindowSettings)
 		mainWindow.Content.ContentMain.ClipsDescendants = true
 		mainWindow.Sidebar.ClipsDescendants = true
 		
-		-- Hide shared fade containers since we parent fades to individual columns now
-		mainWindow.Content.ContentMain.FadesTop.Visible = false
-		mainWindow.Content.ContentMain.FadesBottom.Visible = false
+		-- Destroy shared fade containers and their children to prevent blur ghosting
+		for _, child in pairs(mainWindow.Content.ContentMain.FadesTop:GetDescendants()) do
+			if child:IsA("GuiObject") then
+				child.Visible = false
+			end
+		end
+		for _, child in pairs(mainWindow.Content.ContentMain.FadesBottom:GetDescendants()) do
+			if child:IsA("GuiObject") then
+				child.Visible = false
+			end
+		end
+		mainWindow.Content.ContentMain.FadesTop:Destroy()
+		mainWindow.Content.ContentMain.FadesBottom:Destroy()
 
 		acrylicEvent.Event:Connect(function()
 			notificationAcrylicEvent:Fire()
@@ -2713,9 +2723,23 @@ function Starlight:CreateWindow(WindowSettings)
 				Activate()
 			end
 		end)
-		-- Disable page fades to prevent blur ghosting
-		Tab.Instances.Page.Fade.Visible = false
-		Tab.Instances.Page.Fade2.Visible = false
+		-- Destroy page fades to prevent blur ghosting
+		if Tab.Instances.Page:FindFirstChild("Fade") then
+			for _, child in pairs(Tab.Instances.Page.Fade:GetDescendants()) do
+				if child:IsA("GuiObject") then
+					child.Visible = false
+				end
+			end
+			Tab.Instances.Page.Fade:Destroy()
+		end
+		if Tab.Instances.Page:FindFirstChild("Fade2") then
+			for _, child in pairs(Tab.Instances.Page.Fade2:GetDescendants()) do
+				if child:IsA("GuiObject") then
+					child.Visible = false
+				end
+			end
+			Tab.Instances.Page.Fade2:Destroy()
+		end
 		--ThemeMethods.bindTheme(Tab.Instances.Page.Fade, "BackgroundColor3", "Backgrounds.Dark")
 		--ThemeMethods.bindTheme(Tab.Instances.Page.Fade2, "BackgroundColor3", "Backgrounds.Dark")
 		ThemeMethods.bindTheme(Tab.Instances.Page.Thumbnail, "BackgroundColor3", "Backgrounds.Dark")
