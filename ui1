@@ -2929,46 +2929,7 @@ function Starlight:CreateWindow(WindowSettings)
 					Starlight.Window.TabSections[Name].Tabs[TabIndex].Groupboxes[GroupIndex].Elements[ElementSettings.Name] = Element
 					return Starlight.Window.TabSections[Name].Tabs[TabIndex].Groupboxes[GroupIndex].Elements[ElementSettings.Name]
 				end
-				function Groupbox:CreateDropdown(ElementSettings)
-					ElementSettings = {
-						Name = string,
-						Icon = number,
-						ImageSource = string,
-						Options = table,
-						CurrentOption = table,
-						MultipleOptions = bool,
-						Special = number,
-						Callback = function
-					}
-					ElementSettings.ImageSource = ElementSettings.ImageSource or "Material"
-					ElementSettings.CurrentOption = ElementSettings.CurrentOption or ({ElementSettings.Options[1]})
-					ElementSettings.MultipleOptions = ElementSettings.MultipleOptions or false
-					ElementSettings.Special = ElementSettings.Special or 0
-					local Element = {
-						Values = ElementSettings,
-						Instances = {},
-						State = false
-					}
-					Element.Instances.Element = GroupboxTemplateInstance.Dropdown_TEMPLATE:Clone()
-					Element.Instances.Element.Parent = Groupbox.ParentingItem
-					Element.Instances.Element.Visible = true
-					Element.Instances.Element.Name = "DROPDOWN_" .. ElementSettings.Name
-					Element.Instances.Element.Header.Text = ElementSettings.Name
-					Element.Instances.Popup = mainWindow["Popup Overlay"].Dropdown_TEMPLATE:Clone()
-					Element.Instances.Popup.Parent = mainWindow["Popup Overlay"]
-					Element.Instances.Popup.Header.Text = ElementSettings.Name
-					Element.Instances.Element.Icon.MouseButton1Click:Connect(function()
-						mainWindow["Popup Overlay"].Visible = true
-						Element.Instances.Popup.Visible = true
-						UserInputService.InputBegan:Connect(function(i, g)
-							if g or i.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
-							local p, pos, size = i.Position, Element.Instances.Popup.AbsolutePosition, Element.Instances.Popup.AbsoluteSize
-							if not (p.X >= pos.X and p.X <= pos.X + size.X and p.Y >= pos.Y and p.Y <= pos.Y + size.Y) then
-								mainWindow["Popup Overlay"].Visible = false
-								Element.Instances.Popup.Visible = false
-							end
-						end)
-					end)
+-- here
 					local function ActivateColorSingle(name)
 						for _, Option in pairs(Element.Instances.Popup.Content:GetChildren()) do
 							if Option.ClassName == "Frame" and not string.find(Option.Name, "Option_Template") then
