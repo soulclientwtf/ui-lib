@@ -5383,7 +5383,7 @@ function Starlight:CreateWindow(WindowSettings)
 								end
 							end
 							NestedElement.Instances[1].Header.Text = Table.Unpack(NestedElement.Values.CurrentOption)
-							NestedElement.Instances[1].Header.PlaceholderText = NestedElement.Values.Placeholder or "
+							NestedElement.Instances[1].Header.PlaceholderText = NestedElement.Values.Placeholder or ""
 							if NestedElement.Values.Special == 1 then
 								local c; c = Players.PlayerAdded:Connect(function()
 									if not pcall(Refresh) then
