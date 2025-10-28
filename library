@@ -2930,7 +2930,6 @@ function Starlight:CreateWindow(WindowSettings)
 					return Starlight.Window.TabSections[Name].Tabs[TabIndex].Groupboxes[GroupIndex].Elements[ElementSettings.Name]
 				end
 				function Groupbox:CreateDropdown(ElementSettings)
-					-[[
 					ElementSettings = {
 						Name = string,
 						Icon = number, **
@@ -2941,7 +2940,6 @@ function Starlight:CreateWindow(WindowSettings)
 						Special = number, ** 
 						Callback = function(table)
 					}
-					]]
 					ElementSettings.ImageSource = ElementSettings.ImageSource or "Material"
 					ElementSettings.CurrentOption = ElementSettings.CurrentOption or ({ElementSettings.Options[1]})
 					ElementSettings.MultipleOptions = ElementSettings.MultipleOptions or false
