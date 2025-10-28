@@ -1,6 +1,11 @@
 local Release = "Release 1.0" 
 local debugV = false
 
+-- Configuration toggles for UI buttons
+local ENABLE_SEARCH_BUTTON = false
+local ENABLE_NOTIFICATION_CENTER = false
+local ENABLE_MAXIMIZE_BUTTON = false
+
 local Starlight = {
 
 	InterfaceBuild = "B5B4",
@@ -7789,6 +7794,9 @@ function Starlight:CreateWindow(WindowSettings)
 	end
 
 	do
+		-- Hide notification center button if disabled
+		mainWindow.Content.Topbar.NotificationCenterIcon.Visible = ENABLE_NOTIFICATION_CENTER
+		
 		mainWindow.Content.Topbar.NotificationCenterIcon["MouseEnter"]:Connect(function()
 			Tween(mainWindow.Content.Topbar.NotificationCenterIcon, {ImageColor3 = Starlight.CurrentTheme.Foregrounds.DarkHover})
 		end)
@@ -7869,6 +7877,9 @@ function Starlight:CreateWindow(WindowSettings)
 			end
 		end)
 
+		-- Hide search button if disabled
+		mainWindow.Content.Topbar.Search.Visible = ENABLE_SEARCH_BUTTON
+		
 		mainWindow.Content.Topbar.Search["MouseEnter"]:Connect(function()
 			Tween(mainWindow.Content.Topbar.Search, {ImageColor3 = Starlight.CurrentTheme.Foregrounds.DarkHover})
 		end)
@@ -7909,6 +7920,10 @@ function Starlight:CreateWindow(WindowSettings)
 				}
 			})
 		end)
+		
+		-- Hide maximize button if disabled
+		mainWindow.Content.Topbar.Controls.Maximize.Visible = ENABLE_MAXIMIZE_BUTTON
+		
 		mainWindow.Content.Topbar.Controls.Maximize["MouseButton1Click"]:Connect(function()
 			if Starlight.Maximized then
 				Unmaximize(mainWindow)
