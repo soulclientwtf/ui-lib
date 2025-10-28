@@ -6688,7 +6688,6 @@ function Starlight:CreateWindow(WindowSettings)
 		end)
 	end
 	return Starlight.Window
-end
 function Starlight.FileSystem:BuildFolderTree(FileSettings)
 	if isStudio or (not isfolder) then return "Config system unavailable." end
 	local paths = {}
