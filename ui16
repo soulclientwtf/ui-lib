@@ -4025,187 +4025,119 @@ function Starlight:CreateWindow(WindowSettings)
 					return Starlight.Window.TabSections[Name].Tabs[TabIndex].Groupboxes[GroupIndex].Elements[ElementSettings.Name]
 				end
 
-				function Groupbox:CreateButton(ElementSettings, Index)
-
-					ElementSettings.Style = ElementSettings.Style or 2
-
+				function Groupbox:CreateButton(ElementSettings)
+					-- Custom button implementation without blur issues
+					-- Built from scratch without using problematic templates
+					
+					ElementSettings.Name = ElementSettings.Name or "Button"
+					ElementSettings.Callback = ElementSettings.Callback or function() end
+					
 					local Element = {
 						Values = ElementSettings,
-						Class = "Button",
+						Class = "CleanButton"
 					}
-
-					local Instances
-					task.spawn(function()
-						Instances = {
-							Style1 = GroupboxTemplateInstance["Button_TEMPLATE_Style1"]:Clone(),
-							Style2 = GroupboxTemplateInstance["Button_TEMPLATE_Style2"]:Clone()
-						}
-
-						local tooltips = {}
-
-						for i, ElementInstance in pairs(Instances) do
-
-							ElementInstance.Visible = ElementInstance.Name == "Button_TEMPLATE_Style" .. Element.Values.Style
-
-							ElementInstance.Name = "BUTTON_" .. Index
-							ElementInstance["PART_Backdrop"].Header.Header.Text = Element.Values.Name
-							ElementInstance["PART_Backdrop"].Header.Icon.Visible = not String.IsEmptyOrNull(Element.Values.Icon)
-							ElementInstance["PART_Backdrop"].Header.Icon.Image = not String.IsEmptyOrNull(Element.Values.Icon) and "rbxassetid://" .. Element.Values.Icon or ""
-
-							ElementInstance["PART_Backdrop"].Icon.Image = (Element.Values.IndicatorStyle == 1 and "rbxassetid://6031094680") or (Element.Values.IndicatorStyle == 2 and "rbxassetid://6023565895") or ""
-
-							ElementInstance["PART_Backdrop"].Header.UIListLayout.HorizontalAlignment = Element.Values.CenterContent and Enum.HorizontalAlignment.Center or Enum.HorizontalAlignment.Left
-
-							if ElementInstance.PART_Backdrop:FindFirstChild("Accent") then
-								local hover = nil
-
-								ElementInstance.MouseEnter:Connect(function()
-									Tween(ElementInstance["PART_Backdrop"].DropShadowHolder.DropShadow, {ImageTransparency = 0.73})
-								end)
-
-								ElementInstance.MouseLeave:Connect(function()
-									Tween(ElementInstance["PART_Backdrop"].DropShadowHolder.DropShadow, {ImageTransparency = 1})
-								end)
-
-								ElementInstance.Interact.MouseButton1Down:Connect(function()
-									Tween(ElementInstance["PART_Backdrop"]["PART_BackdropHover"], {BackgroundTransparency = 0})
-									hover = true
-								end)
-
-								UserInputService.InputEnded:Connect(function(input, processed)
-									if not hover then return end
-									if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-										Tween(ElementInstance["PART_Backdrop"]["PART_BackdropHover"], {BackgroundTransparency = 1})
-										hover = false
-									end
-								end)
-
-								ThemeMethods.bindTheme(ElementInstance.PART_Backdrop.Accent, "Color", "Accents.Main")
-								ThemeMethods.bindTheme(ElementInstance.PART_Backdrop.UIStroke.Accent, "Color", "Accents.Main")
-								ThemeMethods.bindTheme(ElementInstance.PART_Backdrop.DropShadowHolder.DropShadow.Accent, "Color", "Accents.Main")
-								ThemeMethods.bindTheme(ElementInstance.PART_Backdrop.PART_BackdropHover.AccentBrighter, "Color", "Accents.Brighter")
-								ThemeMethods.bindTheme(ElementInstance.PART_Backdrop.Icon, "ImageColor3", "Foregrounds.Active")
-								ThemeMethods.bindTheme(ElementInstance.PART_Backdrop.Header.Icon, "ImageColor3", "Foregrounds.Active")
-								ThemeMethods.bindTheme(ElementInstance.PART_Backdrop.Header.Header, "TextColor3", "Foregrounds.Active")
-
-							else
-								ElementInstance.MouseEnter:Connect(function()
-									Tween(ElementInstance["PART_Backdrop"].UIStroke, {Transparency = 0})
-								end)
-
-								ElementInstance.MouseLeave:Connect(function()
-									Tween(ElementInstance["PART_Backdrop"].UIStroke, {Transparency = .85})
-								end)
-
-								ThemeMethods.bindTheme(ElementInstance.PART_Backdrop, "BackgroundColor3", "Backgrounds.Dark")
-								ThemeMethods.bindTheme(ElementInstance.PART_Backdrop.UIStroke, "Color", "Foregrounds.Dark")
-								ThemeMethods.bindTheme(ElementInstance.PART_Backdrop.Shadow, "BackgroundColor3", "Backgrounds.Dark")
-								ThemeMethods.bindTheme(ElementInstance.PART_Backdrop.Icon, "ImageColor3", "Foregrounds.Light")
-								ThemeMethods.bindTheme(ElementInstance.PART_Backdrop.Header.Icon, "ImageColor3", "Foregrounds.Light")
-								ThemeMethods.bindTheme(ElementInstance.PART_Backdrop.Header.Header, "TextColor3", "Foregrounds.Light")
-							end
-
-							ElementInstance.Interact.MouseButton1Click:Connect(function()
-								local Success,Response = pcall(Element.Values.Callback)
-
-								if not Success then
-									ElementInstance["PART_Backdrop"].Header.Header.Text = "Callback Error"
-									warn(`Starlight Interface Suite - Callback Error | {Element.Values.Name} ({Index})`)
-									print(Response)
-									if WindowSettings.NotifyOnCallbackError then
-										Starlight:Notification({
-											Title = Element.Values.Name.." Callback Error",
-											Content = tostring(Response),
-											Icon = 129398364168201
-										})
-									end
-									wait(0.5)
-									ElementInstance["PART_Backdrop"].Header.Header.Text = ElementSettings.Name
-								end
-							end)
-
-							ElementInstance.Parent = Groupbox.ParentingItem
-
-							tooltips[i] = AddToolTip(Element.Values.Tooltip or "", ElementInstance)
-
-							Element.Instance = ElementInstance.Visible and ElementInstance or Element.Instance
-
-						end
-
-						function Element:Set(NewElementSettings , NewIndex)
-							NewIndex = NewIndex or Index
-
-							for i,v in pairs(Element.Values) do
-								if NewElementSettings[i] == nil then
-									NewElementSettings[i] = v
-								end
-							end
-
-							ElementSettings = NewElementSettings
-							Index = NewIndex
-							Element.Values = ElementSettings
-
-							for i, ElementInstance in pairs(Instances) do
-
-								local flag
-								if Element.Values.Style == 1 then
-									flag = ElementInstance.PART_Backdrop:FindFirstChild("Accent")
-								else
-									flag = not ElementInstance.PART_Backdrop:FindFirstChild("Accent")
-								end
-								ElementInstance.Visible = flag
-								ElementInstance.Parent = Groupbox.ParentingItem
-
-								ElementInstance.Name = "BUTTON_" .. NewIndex
-								ElementInstance["PART_Backdrop"].Header.Header.Text = Element.Values.Name
-								ElementInstance["PART_Backdrop"].Header.Icon.Visible = not String.IsEmptyOrNull(Element.Values.Icon)
-								ElementInstance["PART_Backdrop"].Header.Icon.Image = not String.IsEmptyOrNull(Element.Values.Icon) and "rbxassetid://" .. Element.Values.Icon or ""
-
-								tooltips[i].Text = Element.Values.Tooltip or ""
-
-								Element.Instance = ElementInstance.Visible and ElementInstance or Element.Instance
-
-							end
-
-							Starlight.Window.TabSections[Name].Tabs[TabIndex].Groupboxes[GroupIndex].Elements["BUTTON_" .. Index].Values = Element.Values
-
-						end
-
-						function Element:Destroy()
-							for _, ElementInstance in pairs(Instances) do
-								ElementInstance:Destroy()
-							end
-							if Element.NestedElements ~= nil then
-								for _, nestedElement in pairs(Element.NestedElements) do
-									nestedElement:Destroy()
-								end
-							end
-							Element = nil
-						end
-
-						function Element:Lock(Reason : string?)
-
-							for _, ElementInstance in pairs(Instances) do
-								ElementInstance.Lock_Overlay.Visible = true
-								ElementInstance.Interactable = false
-								ElementInstance.Lock_Overlay.Header.Text = Reason or ""
-							end
-
-						end
-
-						function Element:Unlock()
-
-							for _, ElementInstance in pairs(Instances) do
-								ElementInstance.Lock_Overlay.Visible = false
-								ElementInstance.Interactable = true
-								ElementInstance.Lock_Overlay.Header.Text = ""
-							end
-
+					
+					-- Create button frame from scratch
+					local ButtonFrame = Instance.new("Frame")
+					ButtonFrame.Name = "CLEANBUTTON_" .. ElementSettings.Name
+					ButtonFrame.Size = UDim2.new(1, 0, 0, 30)
+					ButtonFrame.BackgroundColor3 = Color3.fromRGB(27, 29, 34)
+					ButtonFrame.BorderSizePixel = 0
+					ButtonFrame.Parent = Groupbox.ParentingItem
+					
+					-- Corner radius
+					local Corner = Instance.new("UICorner")
+					Corner.CornerRadius = UDim.new(0, 6)
+					Corner.Parent = ButtonFrame
+					
+					-- Stroke
+					local Stroke = Instance.new("UIStroke")
+					Stroke.Color = Color3.fromRGB(40, 42, 48)
+					Stroke.Thickness = 1
+					Stroke.Transparency = 0.85
+					Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+					Stroke.Parent = ButtonFrame
+					
+					-- Text Label
+					local TextLabel = Instance.new("TextLabel")
+					TextLabel.Name = "Label"
+					TextLabel.Size = UDim2.new(1, -12, 1, 0)
+					TextLabel.Position = UDim2.new(0, 6, 0, 0)
+					TextLabel.BackgroundTransparency = 1
+					TextLabel.Text = ElementSettings.Name
+					TextLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+					TextLabel.TextSize = 14
+					TextLabel.Font = Enum.Font.Gotham
+					TextLabel.TextXAlignment = Enum.TextXAlignment.Left
+					TextLabel.Parent = ButtonFrame
+					
+					-- Interaction button (invisible, sits on top)
+					local InteractButton = Instance.new("TextButton")
+					InteractButton.Name = "Interact"
+					InteractButton.Size = UDim2.new(1, 0, 1, 0)
+					InteractButton.BackgroundTransparency = 1
+					InteractButton.Text = ""
+					InteractButton.Parent = ButtonFrame
+					
+					-- Hover effects
+					InteractButton.MouseEnter:Connect(function()
+						Tween(ButtonFrame, {BackgroundColor3 = Color3.fromRGB(31, 33, 38)})
+						Tween(Stroke, {Transparency = 0})
+					end)
+					
+					InteractButton.MouseLeave:Connect(function()
+						Tween(ButtonFrame, {BackgroundColor3 = Color3.fromRGB(27, 29, 34)})
+						Tween(Stroke, {Transparency = 0.85})
+					end)
+					
+					-- Click handler
+					InteractButton.MouseButton1Click:Connect(function()
+						local Success, Response = pcall(ElementSettings.Callback)
+						
+						if not Success then
+							TextLabel.Text = "Callback Error"
+							warn("Starlight Interface Suite | " .. ElementSettings.Name .. " Callback Error")
+							print(tostring(Response))
+							wait(0.5)
+							TextLabel.Text = ElementSettings.Name
 						end
 					end)
-
-					Starlight.Window.TabSections[Name].Tabs[TabIndex].Groupboxes[GroupIndex].Elements["BUTTON_" .. Index] = Element
-					return Starlight.Window.TabSections[Name].Tabs[TabIndex].Groupboxes[GroupIndex].Elements["BUTTON_" .. Index]
+					
+					-- Store instance reference
+					Element.Instance = ButtonFrame
+					
+					-- Set method
+					function Element:Set(NewElementSettings)
+						for i, v in pairs(ElementSettings) do
+							if NewElementSettings[i] == nil then
+								NewElementSettings[i] = v
+							end
+						end
+						
+						ElementSettings = NewElementSettings
+						Element.Values = ElementSettings
+						
+						ButtonFrame.Name = "CLEANBUTTON_" .. ElementSettings.Name
+						TextLabel.Text = ElementSettings.Name
+						Starlight.Window.TabSections[Name].Tabs[TabIndex].Groupboxes[GroupIndex].Elements[ElementSettings.Name] = ElementSettings
+					end
+					
+					-- Destroy method
+					function Element:Destroy()
+						ButtonFrame:Destroy()
+					end
+					
+					-- Theme bindings
+					ThemeMethods.bindTheme(ButtonFrame, "BackgroundColor3", "Backgrounds.Dark")
+					ThemeMethods.bindTheme(Stroke, "Color", "Foregrounds.Dark")
+					ThemeMethods.bindTheme(TextLabel, "TextColor3", "Foregrounds.Light")
+					
+					if GroupboxSettings.Style == 2 then
+						Groupbox.Instance["PART_Backdrop"].Size = UDim2.new(1, 0, 0, Groupbox.Instance["PART_Backdrop"].AbsoluteSize.Y)
+					end
+					
+					Starlight.Window.TabSections[Name].Tabs[TabIndex].Groupboxes[GroupIndex].Elements[ElementSettings.Name] = Element
+					return Element
 				end
 
 				function Groupbox:CreateToggle(ElementSettings, Index)
