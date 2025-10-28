@@ -1888,9 +1888,11 @@ function Starlight:CreateWindow(WindowSettings)
 		pcall(function()
 			AcrylicObject.AddParent(mainWindow)
 			AcrylicObject.Frame.Parent = mainWindow
+			AcrylicObject.Frame.Visible = mainAcrylic
 			AcrylicObject.Model.Size = Vector3.new(1.0,1.032,0.001)
 			AcrylicObject2.AddParent(StarlightUI.MobileToggle)
 			AcrylicObject2.Frame.Parent = StarlightUI.MobileToggle
+			AcrylicObject2.Frame.Visible = mainAcrylic
 			AcrylicObject2.Model.Size = Vector3.new(1.0,1.0,0.001)
 		end)
 
@@ -1912,6 +1914,8 @@ function Starlight:CreateWindow(WindowSettings)
 				end
 				Tween(StarlightUI.MobileToggle.Backdrop, {BackgroundTransparency = 0.5})
 				Tween(StarlightUI.MobileToggle.Backdrop.UIStroke, {Transparency = 0.5})
+				AcrylicObject.Frame.Visible = true
+				AcrylicObject2.Frame.Visible = true
 				AcrylicObject.Frame.shadow.Visible = true
 			else
 				Tween(mainWindow, {BackgroundTransparency = 0})
@@ -1929,6 +1933,8 @@ function Starlight:CreateWindow(WindowSettings)
 				end
 				Tween(StarlightUI.MobileToggle.Backdrop, {BackgroundTransparency = 0})
 				Tween(StarlightUI.MobileToggle.Backdrop.UIStroke, {Transparency = 0})
+				AcrylicObject.Frame.Visible = false
+				AcrylicObject2.Frame.Visible = false
 				AcrylicObject.Frame.shadow.Visible = false
 			end
 		end)
