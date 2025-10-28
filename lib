@@ -1622,6 +1622,8 @@ function Starlight:CreateWindow(WindowSettings)
 				if control.ClassName ~= "TextButton" then continue end
 				ThemeMethods.bindTheme(control, "BackgroundColor3", "Foregrounds.Dark")
 			end
+			ThemeMethods.bindTheme(mainWindow.Content.Topbar.NotificationCenterIcon, "ImageColor3", "Foregrounds.Dark")
+			ThemeMethods.bindTheme(mainWindow.Content.Topbar.Search, "ImageColor3", "Foregrounds.Dark")
 			mainWindow.Content.Topbar.NotificationCenterIcon.Visible = false
 			mainWindow.Content.Topbar.Search.Visible = false
 			mainWindow.Content.Topbar.Controls.Maximize.Visible = false
