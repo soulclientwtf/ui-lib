@@ -3625,19 +3625,18 @@ function Starlight:CreateWindow(WindowSettings)
 
 				function Groupbox:CreateDropdown(ElementSettings)
 
-					
+					--[[
 					ElementSettings = {
 						Name = string,
-						Icon = number
-						ImageSource = string
-						Options = table, {string ...}
-						CurrentOption = table/string, {string ...} **
-						MultipleOptions = bool
-						Special = numbera
-
-						Callback = function(table)
+						Icon = number,
+						ImageSource = string,
+						Options = table, -- {string ...}
+						CurrentOption = table/string, -- {string ...}
+						MultipleOptions = bool,
+						Special = number,
+						Callback = function(table) end
 					}
-					
+					--]]
 
 					ElementSettings.ImageSource = ElementSettings.ImageSource or "Material"
 					ElementSettings.CurrentOption = ElementSettings.CurrentOption or ({ElementSettings.Options[1]})
