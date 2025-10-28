@@ -3628,12 +3628,12 @@ function Starlight:CreateWindow(WindowSettings)
 					
 					ElementSettings = {
 						Name = string,
-						Icon = number, **
-						ImageSource = string, **
+						Icon = number
+						ImageSource = string
 						Options = table, {string ...}
 						CurrentOption = table/string, {string ...} **
-						MultipleOptions = bool, **
-						Special = number, ** 
+						MultipleOptions = bool
+						Special = numbera
 
 						Callback = function(table)
 					}
