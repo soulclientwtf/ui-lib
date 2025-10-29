@@ -1,7 +1,6 @@
 local Release = "Release 1.0" 
 local debugV = false
 
--- Configuration toggles for UI buttons
 local ENABLE_SEARCH_BUTTON = false
 local ENABLE_NOTIFICATION_CENTER = false
 local ENABLE_MAXIMIZE_BUTTON = false
